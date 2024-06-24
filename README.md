@@ -1,4 +1,4 @@
-# PriorityConsumerExample Example
+# The simple kafka priority consumer prototype
 
 ## Send data
 
