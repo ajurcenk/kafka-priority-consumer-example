@@ -73,6 +73,9 @@ public class TwoConsumersWithPauseResume {
         // Star low priority consumer
         lowPriorityConsumeThread.start();
 
+        // Wait for low priority thread initialization
+        Thread.sleep(7000);
+
         // Pause low priority consumer
         pauseThread();
 
