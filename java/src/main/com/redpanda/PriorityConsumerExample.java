@@ -24,7 +24,7 @@ public class PriorityConsumerExample {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(Arrays.asList(CRITICAL_TOPIC, HIGH_TOPIC, LOW_TOPIC));
+        consumer.subscribe(Arrays.asList(HIGH_TOPIC, LOW_TOPIC));
 
         long lastPollTime = System.currentTimeMillis();
         int processedMessages = 0;
@@ -41,7 +41,7 @@ public class PriorityConsumerExample {
 
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
-                PriorityQueue<ConsumerRecord<String, String>> priorityQueue = new PriorityQueue<>(new Comparator<ConsumerRecord<String, String>>() {
+                    PriorityQueue<ConsumerRecord<String, String>> priorityQueue = new PriorityQueue<>(new Comparator<ConsumerRecord<String, String>>() {
                     @Override
                     public int compare(ConsumerRecord<String, String> o1, ConsumerRecord<String, String> o2) {
                         return getPriority(o1.topic()) - getPriority(o2.topic());

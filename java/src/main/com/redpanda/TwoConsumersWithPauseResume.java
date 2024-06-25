@@ -29,6 +29,7 @@ public class TwoConsumersWithPauseResume {
         criticalConsumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         criticalConsumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         criticalConsumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        criticalConsumerConfig.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, RoundRobinAssignor.class.getName());
 
         final KafkaConsumer<String, String> criticalConsumer = new KafkaConsumer<>(criticalConsumerConfig);
         criticalConsumer.subscribe(Arrays.asList(CRITICAL_TOPIC));
@@ -43,6 +44,7 @@ public class TwoConsumersWithPauseResume {
                 lowPriorityConsumerConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
                 lowPriorityConsumerConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
                 lowPriorityConsumerConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+                lowPriorityConsumerConfig.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, RoundRobinAssignor.class.getName());
 
                 KafkaConsumer<String, String> lowPriorityConsumer = new KafkaConsumer<>(lowPriorityConsumerConfig);
                 lowPriorityConsumer.subscribe(Arrays.asList(HIGH_TOPIC, LOW_TOPIC));
@@ -61,7 +63,8 @@ public class TwoConsumersWithPauseResume {
                     // Resume the low priority consumer if the low priority consumer is paused
                     ConsumerRecords<String, String> records = lowPriorityConsumer.poll(Duration.ofMillis(100));
                     for (ConsumerRecord<String, String> record : records) {
-                        System.out.println("lowPriorityConsumer: Processing data:" + record.value() );
+                        System.out.println("lowPriorityConsumer: Processing data:" + record.value()
+                                + " from topic, partition" + record.topic() + "," + record.partition());
                         lowPriorityConsumer.commitSync();
                     }
                 } // while
@@ -73,7 +76,7 @@ public class TwoConsumersWithPauseResume {
         // Star low priority consumer
         lowPriorityConsumeThread.start();
 
-        // Wait for low priority thread initialization
+        // Wait for low priority thread `initialization
         Thread.sleep(7000);
 
         // Pause low priority consumer
@@ -96,7 +99,8 @@ public class TwoConsumersWithPauseResume {
             }
 
             for (ConsumerRecord<String, String> record : records) {
-                System.out.println("criticalPriorityConsumer: Processing data:" + record.value() );
+                System.out.println("criticalPriorityConsumer: Processing data:" + record.value()
+                        + " from topic, partition" + record.topic() + "," + record.partition());
                 criticalConsumer.commitSync();
             }
         }
